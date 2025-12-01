@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import { useRef, useEffect } from "react";
 import Section from "./ui/Section";
 import { ArrowRight } from "lucide-react";
 import ThreeHero from "./ThreeHero";
@@ -10,10 +10,25 @@ import LiquidBackground from "./LiquidBackground";
 
 export default function Hero() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end start"],
-    });
+    const scrollYProgress = useMotionValue(0);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        let rafId = 0;
+
+        const tick = () => {
+            const rect = el.getBoundingClientRect();
+            const progress = Math.min(1, Math.max(0, -rect.top / rect.height));
+            scrollYProgress.set(progress);
+            rafId = requestAnimationFrame(tick);
+        };
+
+        rafId = requestAnimationFrame(tick);
+
+        return () => cancelAnimationFrame(rafId);
+    }, [scrollYProgress]);
 
     // Animation Timeline:
     // 0.0 -> 0.2: Transition Phase (Hero Right -> Left, Text Left -> Out, New Text In)
