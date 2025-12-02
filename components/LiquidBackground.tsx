@@ -1,113 +1,174 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
 
-export default function LiquidBackground() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+interface Star {
+  x: number;
+  y: number;
+  z: number;
+}
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+export default function WarpBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-        let time = 0;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-        const mouse = { x: -1000, y: -1000 };
+    let width = 0, height = 0, cx = 0, cy = 0;
+    let animationFrameId: number;
+    let mx = -10000, my = -10000;
 
-        // Vertical following state
-        let centerY = height / 2;
-        let targetCenterY = height / 2;
+    // CONFIG
+    const starCount = 600;
+    let speed = 2;
+    let tailLength = 15;
+    const depth = 1000;
+    const starColor = "#00FFFF";
 
-        // Wave configuration
-        const waves = [
-            { amplitude: 50, frequency: 0.002, speed: 0.01, color: "rgba(0, 206, 209, 0.15)", offset: 0 }, // #00CED1
-            { amplitude: 70, frequency: 0.0015, speed: 0.008, color: "rgba(64, 224, 208, 0.15)", offset: 2 }, // #40E0D0
-            { amplitude: 30, frequency: 0.003, speed: 0.015, color: "rgba(32, 178, 170, 0.15)", offset: 4 }, // #20B2AA
-        ];
+    const safeRadius = 120;
+    const fadeRange = 200;
 
-        function animate() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, width, height);
+    const stars: Star[] = [];
 
-            time += 1;
+    let scrollCount = 0;
+    let slowMode = false;
+    let decayActive = false;
+    let decayStart = 0;
+    let initialSpeed = speed;
+    const speedMin = 0.12; // velocidad mínima al decaer
+    const decayLambda = 1.8; // constante de decaimiento (1/s)
+    let scrollAccum = 0; // acumulador de magnitud de scroll
+    const scrollThreshold = 600; // umbral para activar decaimiento (ajustable)
+    const initialTailLength = tailLength;
+    const startTime = performance.now();
 
-            // Vertical following logic
-            // Target is based on mouse Y, but dampened (e.g., moves 20% of mouse distance)
-            // If mouse is at -1000 (initial), keep center at height/2
-            if (mouse.y > -100) {
-                const offset = (mouse.y - height / 2) * 0.2; // 20% following strength
-                targetCenterY = (height / 2) + offset;
-            } else {
-                targetCenterY = height / 2;
-            }
+    const initStars = () => {
+      stars.length = 0;
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: (Math.random() - 0.5) * width * 3,
+          y: (Math.random() - 0.5) * height * 3,
+          z: Math.random() * depth,
+        });
+      }
+    };
 
-            // Smooth lerp
-            centerY += (targetCenterY - centerY) * 0.05;
+    const resize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      cx = width / 2;
+      cy = height / 2;
+      initStars();
+    };
 
-            waves.forEach((wave) => {
-                ctx.beginPath();
-                ctx.moveTo(0, centerY);
+    const onPointerMove = (e: MouseEvent | TouchEvent) => {
+      if (e instanceof MouseEvent) {
+        mx = e.clientX; my = e.clientY;
+      } else {
+        const t = (e as TouchEvent).touches[0];
+        if (t) { mx = t.clientX; my = t.clientY; }
+      }
+    };
 
-                for (let x = 0; x < width; x++) {
-                    // Base Sine Wave
-                    const yBase = Math.sin(x * wave.frequency + time * wave.speed + wave.offset) * wave.amplitude;
+    const onPointerLeave = () => { mx = -10000; my = -10000; };
 
-                    // Mouse Interaction (Gaussian Bump)
-                    const dx = x - mouse.x;
-                    const dist = Math.abs(dx);
-                    const interactionRadius = 200;
+    const enableSlowMode = () => {
+      if (slowMode) return; slowMode = true; speed = 0.25; tailLength = 0;
+    };
 
-                    let interaction = 0;
-                    if (dist < interactionRadius) {
-                        const dy = (centerY + yBase) - mouse.y;
-                        const vDist = Math.abs(dy);
+    const render = () => {
+      const now = performance.now();
+      const t = (now - startTime) / 1000;
+      // Si el decay está activo, actualizar la velocidad exponencialmente hacia speedMin
+      if (decayActive) {
+        const elapsed = (now - decayStart) / 1000;
+        speed = Math.max(speedMin, speedMin + (initialSpeed - speedMin) * Math.exp(-decayLambda * elapsed));
+        // Reducir gradualmente la estela proporcional a la velocidad
+        tailLength = Math.max(0, Math.round(15 * (speed / initialSpeed)));
+      }
+      ctx.fillStyle = "#000510"; ctx.fillRect(0,0,width,height);
 
-                        // Interaction is now relative to the moving center
-                        const influence = Math.max(0, 1 - dist / interactionRadius) * Math.max(0, 1 - vDist / 300);
-                        interaction = 50 * Math.exp(-(dx * dx) / (2 * 60 * 60));
-                    }
+      ctx.strokeStyle = starColor; ctx.lineWidth = 1.5; ctx.lineCap = "round";
 
-                    ctx.lineTo(x, centerY + yBase + interaction);
-                }
+      stars.forEach((star, idx) => {
+        star.z -= speed;
+        if (star.z <= 0) { star.z = depth; star.x = (Math.random()-0.5)*width*3; star.y = (Math.random()-0.5)*height*3; }
 
-                ctx.strokeStyle = wave.color;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            });
+        const k = 128.0 / star.z; const x1 = cx + star.x * k; const y1 = cy + star.y * k;
+        const dx = x1 - cx; const dy = y1 - cy; const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < safeRadius) return;
 
-            requestAnimationFrame(animate);
+        if (!slowMode) {
+          const k2 = 128.0 / (star.z + tailLength); const x2 = cx + star.x * k2; const y2 = cy + star.y * k2;
+          let alpha = 1; if (dist < safeRadius + fadeRange) alpha = (dist - safeRadius) / fadeRange; alpha *= (1 - star.z / depth);
+          if (alpha > 0.05 && x1 > 0 && x1 < width && y1 > 0 && y1 < height) { ctx.globalAlpha = alpha; ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x1,y1); ctx.stroke(); }
+        } else {
+          const twinkle = 0.6 + 0.4 * Math.sin((star.z * 0.02) + t * 1.5 + idx);
+          const alpha = Math.max(0.05, (1 - star.z / depth) * twinkle);
+          const radius = Math.max(0.35, (1 - star.z / depth) * 1.6);
+          if (x1 > -10 && x1 < width + 10 && y1 > -10 && y1 < height + 10) { ctx.globalAlpha = alpha; ctx.fillStyle = starColor; ctx.beginPath(); ctx.arc(x1,y1,radius,0,Math.PI*2); ctx.fill(); }
         }
+      });
 
-        animate();
+      if (mx > -9999 && my > -9999) {
+        const blurRadius = Math.min(420, Math.max(120, Math.hypot(width, height) * 0.14));
+        ctx.save(); ctx.filter = 'blur(10px)'; const grad = ctx.createRadialGradient(mx,my,0,mx,my,blurRadius);
+        grad.addColorStop(0,'rgba(0,5,16,0.85)'); grad.addColorStop(0.45,'rgba(0,5,16,0.55)'); grad.addColorStop(1,'rgba(0,5,16,0)');
+        ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(mx,my,blurRadius,0,Math.PI*2); ctx.fill(); ctx.filter='none'; ctx.restore();
+      }
 
-        const handleResize = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        };
+      animationFrameId = requestAnimationFrame(render);
+    };
 
-        const handleMouseMove = (e: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
-        };
+    const onWheel = (e: WheelEvent) => {
+      // Acumular magnitud de scroll (soporta touchpads con pequeños deltaY)
+      scrollAccum += Math.abs(e.deltaY);
+      if (!decayActive && scrollAccum >= scrollThreshold) {
+        decayActive = true;
+        decayStart = performance.now();
+        initialSpeed = speed;
+        slowMode = true;
+      }
+    };
 
-        window.addEventListener("resize", handleResize);
-        window.addEventListener("mousemove", handleMouseMove);
+    const onTouchStart = () => {
+      // Contar touch como una cantidad significativa de scroll
+      scrollAccum += 200;
+      if (!decayActive && scrollAccum >= scrollThreshold) {
+        decayActive = true;
+        decayStart = performance.now();
+        initialSpeed = speed;
+        slowMode = true;
+      }
+    };
 
-        return () => {
-            window.removeEventListener("resize", handleResize);
-            window.removeEventListener("mousemove", handleMouseMove);
-        };
-    }, []);
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('mouseleave', onPointerLeave);
+    window.addEventListener('touchend', onPointerLeave);
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
 
-    return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-        />
-    );
+    resize(); render();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('mouseleave', onPointerLeave);
+      window.removeEventListener('touchend', onPointerLeave);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} className="fixed inset-0 -z-10 w-full h-full pointer-events-none" />
+  );
 }
