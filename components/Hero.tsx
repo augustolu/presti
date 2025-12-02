@@ -15,7 +15,12 @@ export default function Hero() {
     const scrollYProgress = useMotionValue(0);
     const router = useRouter();
     const [isWarping, setIsWarping] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [destination, setDestination] = useState("");
+
+    useEffect(() => {
+        setIsLoading(false);
+    }, []);
 
     const handleWarp = (path: string) => {
         setDestination(path);
@@ -99,7 +104,7 @@ export default function Hero() {
                 {/* Main Content Container */}
                 <motion.div
                     className="relative max-w-7xl mx-auto h-full px-6 md:px-12 flex items-center"
-                    animate={{ opacity: isWarping ? 0 : 1 }}
+                    animate={{ opacity: (isWarping || isLoading) ? 0 : 1 }}
                     transition={{ duration: 0.5 }}
                 >
 
