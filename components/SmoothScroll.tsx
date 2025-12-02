@@ -19,10 +19,11 @@ export default function SmoothScroll({ children }: Props) {
       content: contentRef.current,
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true,
-      direction: "vertical",
-      gestureDirection: "vertical",
       lerp: 0.08,
+    });
+
+    lenis.on('scroll', (e: any) => {
+      window.dispatchEvent(new CustomEvent('lenis-scroll', { detail: e }));
     });
 
     function raf(time: number) {
