@@ -1,44 +1,125 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Instagram, Mail, Twitter, Linkedin } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
+import { Instagram, Phone, Mail, ArrowUpRight } from "lucide-react";
 
 export default function Footer() {
-    return (
-        <footer id="contact" className="bg-black border-t border-white/10 py-20">
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-6">
-                        <h2 className="text-4xl font-bold">¿Listo para crear algo increíble?</h2>
-                        <p className="text-gray-400 text-lg">
-                            Hablemos sobre tu próximo proyecto y cómo podemos llevarlo al siguiente nivel.
-                        </p>
-                        <a
-                            href="mailto:contacto@ejemplo.com"
-                            className="inline-block text-2xl font-medium text-[var(--accent)] hover:underline decoration-2 underline-offset-4"
-                        >
-                            contacto@ejemplo.com
-                        </a>
-                    </div>
+    const titleRef = useRef<HTMLHeadingElement>(null);
+    const textRef = useRef<HTMLParagraphElement>(null);
+    const linksRef = useRef<HTMLDivElement>(null);
 
-                    <div className="flex flex-col md:items-end gap-6">
-                        <div className="flex gap-6">
-                            {[Instagram, Twitter, Linkedin, Mail].map((Icon, index) => (
-                                <motion.a
-                                    key={index}
-                                    href="#"
-                                    whileHover={{ y: -5, color: "var(--accent)" }}
-                                    className="text-gray-400 transition-colors"
-                                >
-                                    <Icon size={24} />
-                                </motion.a>
-                            ))}
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Title Animation
+                        animate(titleRef.current, {
+                            opacity: [0, 1],
+                            translateY: [50, 0],
+                            duration: 1000,
+                            ease: "outExpo",
+                            delay: 200,
+                        });
+
+                        // Text Animation
+                        animate(textRef.current, {
+                            opacity: [0, 1],
+                            translateY: [30, 0],
+                            duration: 1000,
+                            ease: "outExpo",
+                            delay: 400,
+                        });
+
+                        // Links Animation (Staggered)
+                        animate(linksRef.current?.children, {
+                            opacity: [0, 1],
+                            translateY: [20, 0],
+                            duration: 800,
+                            ease: "outExpo",
+                            delay: stagger(100, { start: 600 }),
+                        });
+                    }
+                });
+            },
+            { threshold: 0.3 }
+        );
+
+        if (titleRef.current) observer.observe(titleRef.current);
+
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <footer id="contact" className="min-h-screen flex flex-col justify-center items-center bg-black relative overflow-hidden py-20">
+            {/* Background Elements */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,245,212,0.03),transparent_70%)] pointer-events-none" />
+
+            <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+                <h2
+                    ref={titleRef}
+                    className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter opacity-0"
+                >
+                    Hablemos.
+                </h2>
+
+                <p
+                    ref={textRef}
+                    className="text-xl md:text-2xl text-gray-400 mb-16 max-w-2xl mx-auto leading-relaxed opacity-0"
+                >
+                    ¿Listo para llevar tu contenido al siguiente nivel? <br />
+                    Estoy disponible para nuevos proyectos.
+                </p>
+
+                <div ref={linksRef} className="grid md:grid-cols-3 gap-8 w-full max-w-3xl mx-auto">
+                    {/* Instagram */}
+                    <a
+                        href="https://www.instagram.com/notpresti/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all hover:scale-105 hover:border-[var(--accent)]/50 opacity-0"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center mb-4 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-shadow">
+                            <Instagram className="w-6 h-6 text-white" />
                         </div>
-                        <p className="text-gray-600 text-sm">
-                            © {new Date().getFullYear()} Editor Portfolio. Todos los derechos reservados.
-                        </p>
+                        <span className="text-lg font-bold mb-1">Instagram</span>
+                        <span className="text-sm text-gray-400 group-hover:text-[var(--accent)] transition-colors flex items-center gap-1">
+                            @notpresti <ArrowUpRight className="w-3 h-3" />
+                        </span>
+                    </a>
+
+                    {/* Phone */}
+                    <a
+                        href="https://wa.me/5492664884211"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all hover:scale-105 hover:border-[var(--accent)]/50 opacity-0"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-shadow">
+                            <Phone className="w-6 h-6 text-green-500" />
+                        </div>
+                        <span className="text-lg font-bold mb-1">Whatsapp</span>
+                        <span className="text-sm text-gray-400 group-hover:text-[var(--accent)] transition-colors">
+                            +54 9 266 488-4211
+                        </span>
+                    </a>
+
+                    {/* Email (Coming Soon) */}
+                    <div className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 opacity-0 cursor-not-allowed">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
+                            <Mail className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <span className="text-lg font-bold mb-1">Email</span>
+                        <span className="text-sm text-gray-500">
+                            Próximamente
+                        </span>
                     </div>
                 </div>
+            </div>
+
+            <div className="absolute bottom-8 text-center w-full text-gray-600 text-sm">
+                © {new Date().getFullYear()} Valentino Presti. Todos los derechos reservados.
             </div>
         </footer>
     );

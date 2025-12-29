@@ -5,11 +5,6 @@ import { motion } from "framer-motion";
 const skills = [
     "Adobe Premiere Pro",
     "After Effects",
-    "DaVinci Resolve",
-    "Final Cut Pro",
-    "Cinema 4D",
-    "Blender",
-    "Audition",
     "Photoshop",
 ];
 

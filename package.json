@@ -13,6 +13,7 @@
     "@react-three/fiber": "^9.4.2",
     "@studio-freight/lenis": "^1.0.42",
     "@types/three": "^0.181.0",
+    "animejs": "^4.2.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.555.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/animejs": "^3.1.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

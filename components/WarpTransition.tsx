@@ -33,8 +33,8 @@ export default function WarpTransition({ isActive, onComplete }: WarpTransitionP
         const stars: Star[] = [];
         const starCount = 1000;
         let speed = 0.1;
-        const maxSpeed = 40;
-        const acceleration = 0.5;
+        const maxSpeed = 5;
+        const acceleration = 1.08; // Exponential multiplier
 
         const initStars = () => {
             stars.length = 0;
@@ -62,9 +62,9 @@ export default function WarpTransition({ isActive, onComplete }: WarpTransitionP
             ctx.fillStyle = "rgba(0, 5, 16, 0.4)"; // #000510 with opacity
             ctx.fillRect(0, 0, width, height);
 
-            // Accelerate
+            // Accelerate exponentially
             if (speed < maxSpeed) {
-                speed += acceleration;
+                speed *= acceleration;
             }
 
             ctx.strokeStyle = "#FFFFFF";

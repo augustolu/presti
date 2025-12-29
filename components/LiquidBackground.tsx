@@ -28,7 +28,7 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     let mx = -10000, my = -10000;
 
     // CONFIG
-    const starCount = 600;
+    const starCount = 230;
     // Start fast if requested (simulating exit from warp), otherwise normal speed
     let speed = startFast ? 40 : 2;
     let tailLength = 15;
@@ -41,7 +41,7 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     const stars: Star[] = [];
 
     // Scroll control config
-    const maxSpeed = 2.0;
+    const maxSpeed = 1.0;
     const minSpeed = 0.1;
     const scrollRange = 1000; // pixels to reach min speed
     let targetSpeed = maxSpeed;
