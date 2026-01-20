@@ -26,7 +26,7 @@ export default function VideoEditingPage() {
             >
                 <h1 className="text-6xl font-bold text-[var(--accent)] mb-8">Edición de Video</h1>
                 <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12">
-                    aca vemos q choton ponemos
+                    Narrativa visual y storytelling de alto nivel para tus videos.
                 </p>
 
                 <button

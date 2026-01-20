@@ -72,7 +72,7 @@ export default function Footer() {
                     Estoy disponible para nuevos proyectos.
                 </p>
 
-                <div ref={linksRef} className="grid md:grid-cols-3 gap-8 w-full max-w-3xl mx-auto">
+                <div ref={linksRef} className="grid md:grid-cols-1 gap-8 w-full max-w-3xl mx-auto">
                     {/* Instagram */}
                     <a
                         href="https://www.instagram.com/notpresti/"
@@ -88,33 +88,6 @@ export default function Footer() {
                             @notpresti <ArrowUpRight className="w-3 h-3" />
                         </span>
                     </a>
-
-                    {/* Phone */}
-                    <a
-                        href="https://wa.me/5492664884211"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all hover:scale-105 hover:border-[var(--accent)]/50 opacity-0"
-                    >
-                        <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-shadow">
-                            <Phone className="w-6 h-6 text-green-500" />
-                        </div>
-                        <span className="text-lg font-bold mb-1">Whatsapp</span>
-                        <span className="text-sm text-gray-400 group-hover:text-[var(--accent)] transition-colors">
-                            +54 9 266 488-4211
-                        </span>
-                    </a>
-
-                    {/* Email (Coming Soon) */}
-                    <div className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 opacity-0 cursor-not-allowed">
-                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
-                            <Mail className="w-6 h-6 text-blue-500" />
-                        </div>
-                        <span className="text-lg font-bold mb-1">Email</span>
-                        <span className="text-sm text-gray-500">
-                            Próximamente
-                        </span>
-                    </div>
                 </div>
             </div>
 

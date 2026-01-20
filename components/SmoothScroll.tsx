@@ -1,46 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import Lenis from "@studio-freight/lenis";
+import { LenisContext } from "@/lib/LenisContext";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default function SmoothScroll({ children }: Props) {
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
-    if (!wrapperRef.current || !contentRef.current) return;
-
-    const lenis = new Lenis({
-      wrapper: wrapperRef.current,
-      content: contentRef.current,
+    const newLenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       lerp: 0.08,
     });
 
-    lenis.on('scroll', (e: any) => {
+    newLenis.on('scroll', (e: any) => {
       window.dispatchEvent(new CustomEvent('lenis-scroll', { detail: e }));
     });
 
     function raf(time: number) {
-      lenis.raf(time);
+      newLenis.raf(time);
       requestAnimationFrame(raf);
     }
 
     requestAnimationFrame(raf);
+    setLenis(newLenis);
 
     return () => {
-      lenis.destroy();
+      newLenis.destroy();
+      setLenis(null);
     };
-  }, []);
+  }, [setLenis]);
 
-  return (
-    <div ref={wrapperRef} style={{ height: "100vh", overflow: "hidden" }}>
-      <div ref={contentRef}>{children}</div>
-    </div>
-  );
+  return <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>;
 }

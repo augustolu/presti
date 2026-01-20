@@ -26,14 +26,22 @@ function DepthPlane({ mouseX, mouseY }: DepthPlaneProps) {
         colorMap.magFilter = THREE.LinearFilter;
         colorMap.wrapS = THREE.ClampToEdgeWrapping;
         colorMap.wrapT = THREE.ClampToEdgeWrapping;
-        
+
         // Tell Three.js to update the texture with the new settings
         colorMap.needsUpdate = true;
     }, [colorMap]);
 
     const aspect = (colorMap.image as HTMLImageElement).width / (colorMap.image as HTMLImageElement).height || 0.8;
-    const planeWidth = 8; // Adjusted width for the new logo
-    const planeHeight = planeWidth / aspect;
+
+    // Responsive scaling: fit within 80% of viewport width or height
+    const scaleFactor = 0.9;
+    let planeWidth = viewport.width * scaleFactor;
+    let planeHeight = planeWidth / aspect;
+
+    if (planeHeight > viewport.height * scaleFactor) {
+        planeHeight = viewport.height * scaleFactor;
+        planeWidth = planeHeight * aspect;
+    }
 
     useFrame((state) => {
         if (!mesh.current) return;
@@ -43,7 +51,7 @@ function DepthPlane({ mouseX, mouseY }: DepthPlaneProps) {
         const pointerY = mouseY.get();
 
         // 1. Add subtle rotation (tilt effect)
-        const targetRotX = pointerY * 0.5; 
+        const targetRotX = pointerY * 0.5;
         const targetRotY = pointerX * 0.5;
         mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, targetRotX, 0.1);
         mesh.current.rotation.y = THREE.MathUtils.lerp(mesh.current.rotation.y, targetRotY, 0.1);
@@ -60,7 +68,7 @@ function DepthPlane({ mouseX, mouseY }: DepthPlaneProps) {
                 roughness={0.7}
                 metalness={0.1}
                 transparent={true}
-                alphaTest={0.5}
+
             />
         </mesh>
     );
@@ -82,12 +90,14 @@ interface ThreeHeroProps {
 
 export default function ThreeHero({ className, mouseX, mouseY }: ThreeHeroProps) {
     return (
-        <div className={`${className} pointer-events-none`}>
+        <div className={`${className} w-full h-full pointer-events-none`}>
             {/* The canvas itself should not capture events now */}
-            <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
+            <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 10], fov: 35 }}>
                 <Lighting />
                 <React.Suspense fallback={null}>
-                    <DepthPlane mouseX={mouseX} mouseY={mouseY} />
+                    <group position={[0, 0, 0]}>
+                        <DepthPlane mouseX={mouseX} mouseY={mouseY} />
+                    </group>
                 </React.Suspense>
             </Canvas>
         </div>

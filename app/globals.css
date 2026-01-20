@@ -3,7 +3,7 @@
 :root {
   --background: #0a0a0a;
   --foreground: #ededed;
-  --accent: #00F5D4;
+  --accent: #8B5CF6;
 }
 
 @theme inline {
@@ -13,9 +13,6 @@
   --font-sans: var(--font-inter);
 }
 
-html {
-  scroll-behavior: smooth;
-}
 
 body {
   background: var(--background);
@@ -34,16 +31,18 @@ body {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
 }
 
 .animated-rgb {
-  background: linear-gradient(90deg, var(--accent), #06b6d4, #0ea5e9);
+  background: linear-gradient(90deg, var(--accent), #a855f7, #ec4899);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;

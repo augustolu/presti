@@ -2,39 +2,29 @@
 
 import { motion } from "framer-motion";
 
-const skills = [
-    "Adobe Premiere Pro",
-    "After Effects",
-    "Photoshop",
-];
-
 export default function Marquee() {
+    const text = "Adobe Premiere Pro - After Effects - ";
     return (
-        <div id="skills" className="py-12 bg-white/5 border-y border-white/5 overflow-hidden relative">
-            <div className="flex w-full">
-                <motion.div
-                    className="flex whitespace-nowrap gap-16 items-center"
-                    animate={{ x: ["0%", "-50%"] }}
-                    transition={{
-                        repeat: Infinity,
-                        ease: "linear",
-                        duration: 20,
-                    }}
-                >
-                    {[...skills, ...skills, ...skills, ...skills].map((skill, index) => (
-                        <div
-                            key={index}
-                            className="text-2xl md:text-4xl font-bold text-gray-500 hover:text-[var(--accent)] transition-colors cursor-default"
-                        >
-                            {skill}
-                        </div>
-                    ))}
-                </motion.div>
-            </div>
-
-            {/* Gradients for fade effect */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[var(--background)] to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[var(--background)] to-transparent z-10" />
+        <div 
+            className="relative w-full h-24 flex items-center overflow-x-hidden backdrop-blur-sm"
+            style={{ backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))' }}
+        >
+            <motion.div
+                className="flex whitespace-nowrap"
+                animate={{
+                    x: ['0%', '-100%'],
+                }}
+                transition={{
+                    ease: 'linear',
+                    duration: 30,
+                    repeat: Infinity,
+                }}
+            >
+                <h1 className="text-4xl font-bold text-white/10 uppercase">{text}</h1>
+                <h1 className="text-4xl font-bold text-white/10 uppercase">{text}</h1>
+                <h1 className="text-4xl font-bold text-white/10 uppercase">{text}</h1>
+                <h1 className="text-4xl font-bold text-white/10 uppercase">{text}</h1>
+            </motion.div>
         </div>
     );
 }

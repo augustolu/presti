@@ -1,96 +1,189 @@
 "use client";
 
-import { motion, useMotionValue } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
 import ThreeHero from "./ThreeHero";
 import LiquidBackground from "./LiquidBackground";
-import { ArrowDown } from "lucide-react";
+import { Video, MonitorPlay, ArrowRight } from "lucide-react";
+
+interface LenisScrollEvent extends Event {
+  detail: {
+    scroll: number;
+  };
+}
 
 export default function Hero() {
+    const [hoveredService, setHoveredService] = useState<"video" | "motion" | null>(null);
     const containerRef = useRef<HTMLElement>(null);
+    const scrollYProgress = useMotionValue(0);
 
-    // Mouse tracking for the 3D hero element
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const handleScroll = (e: LenisScrollEvent) => {
+            const { scroll: y } = e.detail;
+
+            const rect = el.getBoundingClientRect();
+            const elTop = rect.top + y;
+            const elHeight = rect.height;
+            const viewportHeight = window.innerHeight;
+
+            const progress = (y - elTop) / (elHeight - viewportHeight);
+            scrollYProgress.set(Math.max(0, Math.min(1, progress)));
+        };
+
+        window.addEventListener("lenis-scroll", handleScroll as unknown as EventListener);
+
+        return () => {
+            window.removeEventListener("lenis-scroll", handleScroll as unknown as EventListener);
+        };
+    }, [scrollYProgress]);
+
+    const smoothProgress = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    });
+
+    // Mouse tracking for 3D hero
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
-    
+
     useEffect(() => {
-        const sectionEl = containerRef.current;
-        if (!sectionEl) return;
-
         const handleMouseMove = (e: MouseEvent) => {
-            const { clientX, clientY, currentTarget } = e;
-            if (!currentTarget) return;
-
-            const {
-                left,
-                top,
-                width,
-                height,
-            } = (currentTarget as HTMLElement).getBoundingClientRect();
-            
-            const x = (clientX - (left + width / 2)) / width;
-            const y = (clientY - (top + height / 2)) / height;
+            const { clientX, clientY } = e;
+            const { innerWidth, innerHeight } = window;
+            const x = (clientX - innerWidth / 2) / innerWidth;
+            const y = (clientY - innerHeight / 2) / innerHeight;
             mouseX.set(x);
             mouseY.set(y);
         };
-
-        sectionEl.addEventListener("mousemove", handleMouseMove);
-        return () => {
-            sectionEl.removeEventListener("mousemove", handleMouseMove);
-        };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [mouseX, mouseY]);
 
-    return (
-        <section 
-            ref={containerRef}
-            className="relative h-screen w-full flex items-center justify-center text-white overflow-hidden"
-        >
-            <div className="absolute inset-0 w-full h-full z-0">
-                <LiquidBackground />
-            </div>
-            
-            <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-7xl mx-auto px-6">
-                
-                <motion.h1 
-                    className="text-6xl md:text-8xl font-bold leading-tight mb-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                >
-                    Tu contenido <br />
-                    <span className="animated-rgb whitespace-nowrap">
-                        Al siguiente nivel.
-                    </span>
-                </motion.h1>
+    // Animations based on scroll
+    // Animations based on scroll
+    const opacityHero = useTransform(smoothProgress, [0, 0.2], [1, 0]);
+    const scaleHero = useTransform(smoothProgress, [0, 0.2], [1, 0.8]);
+    const opacityLogo = useTransform(smoothProgress, [0, 0.2], [1, 0]); // Logo fades out
 
-                {/* 3D Hero */}
-                <div className="relative w-full h-[80vh] md:h-[90vh] max-w-7xl my-4">
-                    <ThreeHero mouseX={mouseX} mouseY={mouseY} />
+    // Branching animations
+    const opacityBranch = useTransform(smoothProgress, [0.3, 0.5], [0, 1]);
+    const yBranch = useTransform(smoothProgress, [0.3, 0.5], [50, 0]);
+
+    // Line drawing animations
+    const lineLength = useTransform(smoothProgress, [0.2, 0.4], [0, 1]);
+
+    // Text follow cursor animation
+    const xText = useTransform(mouseX, [-0.5, 0.5], [-15, 15]);
+    const yText = useTransform(mouseY, [-0.5, 0.5], [-15, 15]);
+
+    return (
+        <section ref={containerRef} className="relative w-full h-auto bg-black">
+            {/* Sticky Wrapper for Scrollytelling */}
+            <div className="sticky top-0 w-full h-screen overflow-hidden">
+
+                {/* Backgrounds */}
+                <div className="absolute inset-0 w-full h-full z-0">
+                    <LiquidBackground />
                 </div>
 
-                <motion.p 
-                    className="text-gray-300 text-lg md:text-xl max-w-2xl mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                >
-                    Editor profesional especializado en edición de videos y motion graphics.
-                </motion.p>
-
+                {/* 3D Hero - Anchor */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
+                    style={{ opacity: opacityLogo }}
+                    className="absolute left-0 w-full top-[5vh] h-[50vh] z-10 flex items-center justify-center pointer-events-none"
                 >
-                    <a
-                        href="#contact"
-                        className="group mt-4 inline-flex relative px-8 py-4 bg-[var(--accent)] rounded-xl overflow-hidden items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,245,212,0.2)] hover:shadow-[0_0_30px_rgba(0,245,212,0.4)] transition-all duration-300 hover:scale-105"
-                    >
-                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                        <span className="text-black font-bold text-lg tracking-wider">Mis Servicios</span>
-                        <ArrowDown className="w-5 h-5 text-black group-hover:translate-y-1 transition-transform" />
-                    </a>
+                    <ThreeHero mouseX={mouseX} mouseY={mouseY} />
                 </motion.div>
+
+                {/* Content Container */}
+                <div className="relative z-20 min-h-screen flex flex-col items-center justify-center pb-24 pointer-events-none">
+
+                    {/* Initial Hero Content */}
+                    <motion.div
+                        style={{ opacity: opacityHero, scale: scaleHero, x: xText, y: yText }}
+                        className="text-center flex flex-col items-center gap-6 p-6"
+                    >
+                        <h1 className="text-6xl md:text-8xl font-bold flex flex-col items-center gap-6">
+                            <span>Tu contenido</span>
+                            <span className="animated-rgb whitespace-nowrap leading-tight">
+                                Al siguiente nivel.
+                            </span>
+                        </h1>
+                        <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
+                            Editor profesional especializado en edición de videos y motion graphics.
+                        </p>
+                    </motion.div>
+
+                    {/* Branching Services Content */}
+                    <motion.div
+                        style={{ opacity: opacityBranch, y: yBranch }}
+                        className="absolute inset-0 flex items-center justify-center w-full h-full pointer-events-auto"
+                    >
+                        <div className="w-full h-full flex flex-col md:flex-row">
+
+                            {/* Left Section: Video Editing */}
+                            <motion.div
+                                onMouseEnter={() => setHoveredService("video")}
+                                onMouseLeave={() => setHoveredService(null)}
+                                animate={{ flex: hoveredService === "video" ? 2 : hoveredService === "motion" ? 1 : 1.5 }}
+                                transition={{ duration: 0.2, ease: "circOut" }}
+                                className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                            >
+                                {/* Background Icon Hook */}
+                                <Video className="absolute -left-12 -bottom-12 w-96 h-96 text-white/[.03] group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" />
+
+                                <div className="relative z-10 flex flex-col items-center text-center gap-6">
+                                    <div className="w-24 h-24 rounded-full bg-[var(--accent)]/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ring-1 ring-white/20 group-hover:ring-[var(--accent)]/50">
+                                        <Video className="w-10 h-10 text-[var(--accent)]" />
+                                    </div>
+                                    <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight">Edición de Video</h3>
+                                    <motion.p
+                                        animate={{ opacity: hoveredService === "motion" ? 0.5 : 1 }}
+                                        className="text-gray-400 max-w-md text-lg"
+                                    >
+                                        Narrativa visual impactante. Cortes dinámicos, color grading y storytelling que atrapa.
+                                    </motion.p>
+                                    <span className="text-[var(--accent)] font-medium group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-2">
+                                        Ver Proyectos <ArrowRight className="w-5 h-5" />
+                                    </span>
+                                </div>
+                            </motion.div>
+
+                            {/* Right Section: Motion Graphics */}
+                            <motion.div
+                                onMouseEnter={() => setHoveredService("motion")}
+                                onMouseLeave={() => setHoveredService(null)}
+                                animate={{ flex: hoveredService === "motion" ? 2 : hoveredService === "video" ? 1 : 1.5 }}
+                                transition={{ duration: 0.2, ease: "circOut" }}
+                                className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                            >
+                                {/* Background Icon Hook */}
+                                <MonitorPlay className="absolute -right-12 -top-12 w-96 h-96 text-white/[.03] group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" />
+
+                                <div className="relative z-10 flex flex-col items-center text-center gap-6">
+                                    <div className="w-24 h-24 rounded-full bg-[var(--accent)]/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ring-1 ring-white/20 group-hover:ring-[var(--accent)]/50">
+                                        <MonitorPlay className="w-10 h-10 text-[var(--accent)]" />
+                                    </div>
+                                    <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight">Motion Graphics</h3>
+                                    <motion.p
+                                        animate={{ opacity: hoveredService === "video" ? 0.5 : 1 }}
+                                        className="text-gray-400 max-w-md text-lg"
+                                    >
+                                        Animaciones que dan vida. Intros, logos y explicativos con acabados premium.
+                                    </motion.p>
+                                    <span className="text-[var(--accent)] font-medium group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-2">
+                                        Ver Proyectos <ArrowRight className="w-5 h-5" />
+                                    </span>
+                                </div>
+                            </motion.div>
+
+                        </div>
+                    </motion.div>
+
+                </div>
             </div>
         </section>
     );

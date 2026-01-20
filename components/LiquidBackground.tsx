@@ -123,12 +123,12 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
         }
       });
 
-      if (mx > -9999 && my > -9999) {
+      /* if (mx > -9999 && my > -9999) {
         const blurRadius = Math.min(420, Math.max(120, Math.hypot(width, height) * 0.14));
         ctx.save(); ctx.filter = 'blur(10px)'; const grad = ctx.createRadialGradient(mx, my, 0, mx, my, blurRadius);
         grad.addColorStop(0, 'rgba(0,5,16,0.85)'); grad.addColorStop(0.45, 'rgba(0,5,16,0.55)'); grad.addColorStop(1, 'rgba(0,5,16,0)');
         ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(mx, my, blurRadius, 0, Math.PI * 2); ctx.fill(); ctx.filter = 'none'; ctx.restore();
-      }
+      } */
 
       animationFrameId = requestAnimationFrame(render);
     };

@@ -7,10 +7,10 @@ import Link from "next/link";
 import Image from "next/image";
 
 const navLinks = [
-    { name: "Inicio", href: "#hero" },
+    { name: "Inicio", href: "/" },
     { name: "Skills", href: "#skills" },
-    { name: "Portfolio", href: "#portfolio" },
-    { name: "Contacto", href: "#contact" },
+    { name: "Motion Graphics", href: "/motion-graphics" },
+    { name: "Edición de video", href: "/video-editing" },
 ];
 
 export default function Navbar() {
@@ -21,7 +21,7 @@ export default function Navbar() {
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
-            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/50 border-b border-white/10"
+            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/30 border-b border-white/5"
         >
             <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
                 {/* LOGO */}
