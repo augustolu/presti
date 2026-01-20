@@ -23,7 +23,7 @@ export default function Section({ children, className, id, title, subtitle, dela
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay, ease: "easeOut" }}
             className={cn(
-                "py-20 px-6 md:px-12",
+                "py-10 px-6 md:px-12",
                 !fullWidth && "max-w-7xl mx-auto",
                 className
             )}

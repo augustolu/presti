@@ -14,14 +14,22 @@ export default function VideoEditing({ hoveredService, setHoveredService }: Vide
         <motion.div
             onMouseEnter={() => setHoveredService("video")}
             onMouseLeave={() => setHoveredService(null)}
-            animate={{ 
+            animate={{
                 flex: hoveredService === "video" ? 2 : hoveredService === "motion" ? 1 : 1.5,
-                boxShadow: hoveredService === "video" ? '0 0 80px rgba(255,255,255,0.05)' : 'none'
             }}
             transition={{ duration: 0.5, ease: "circOut" }}
-            className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden hover:bg-white/[.02] transition-colors duration-300 cursor-pointer"
+            className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden transition-colors duration-300 cursor-pointer"
         >
-            <Video className="absolute -left-4 -bottom-4 w-80 h-80 text-white/[.01] group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" />
+            <motion.div
+                className="absolute inset-0 pointer-events-none"
+                animate={{ opacity: hoveredService === "video" ? 1 : 0 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+                style={{
+                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%)',
+                    willChange: 'opacity'
+                }}
+            />
+
             <div className="relative z-10 flex flex-col items-center text-center gap-6">
                 <div className="w-24 h-24 rounded-full bg-[var(--accent)]/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ring-1 ring-white/20 group-hover:ring-[var(--accent)]/50">
                     <Video className="w-10 h-10 text-[var(--accent)]" />
