@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 
 export default function Marquee() {
-    const text = "Adobe Premiere Pro - After Effects - ";
+    const text = "- Adobe Premiere Pro - After Effects - Motion Graphics - Edición de Video - Diseño Visual ";
     return (
         <div 
             className="relative w-full h-24 flex items-center overflow-x-hidden backdrop-blur-sm"
@@ -12,11 +12,11 @@ export default function Marquee() {
             <motion.div
                 className="flex whitespace-nowrap"
                 animate={{
-                    x: ['0%', '-100%'],
+                    x: ['0%', '-20%'],
                 }}
                 transition={{
                     ease: 'linear',
-                    duration: 30,
+                    duration: 15,
                     repeat: Infinity,
                 }}
             >
