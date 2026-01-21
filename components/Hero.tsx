@@ -99,7 +99,7 @@ export default function Hero() {
                 </motion.div>
 
                 {/* Content Container */}
-                <div className="relative z-20 min-h-screen flex flex-col items-center justify-center pb-24 pointer-events-none">
+                <div className="relative z-20 min-h-screen flex flex-col items-center justify-center pb-32 pointer-events-none">
 
                     {/* Initial Hero Content */}
                     <motion.div
@@ -108,7 +108,7 @@ export default function Hero() {
                     >
                         <h1 className="text-6xl md:text-8xl font-bold flex flex-col items-center gap-6">
                             <span>Tu contenido</span>
-                            <span className="animated-rgb whitespace-nowrap leading-tight">
+                            <span className="animated-rgb whitespace-nowrap leading-tight pb-4">
                                 Al siguiente nivel.
                             </span>
                         </h1>

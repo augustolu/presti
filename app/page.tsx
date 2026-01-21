@@ -21,7 +21,7 @@ export default function Home() {
       <Navbar />
       <HeroSection />
 
-      <Section title="Servicios" subtitle="Lo que hago" fullWidth className="py-0 px-0">
+      <Section fullWidth className="py-0 px-0">
         <div className="w-full h-screen flex flex-col md:flex-row">
           <VideoEditing
             hoveredService={hoveredService}

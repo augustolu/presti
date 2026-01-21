@@ -32,11 +32,11 @@ export default function HeroSection() {
             </div>
             <motion.div
                 style={{ x: xText, y: yText }}
-                className="relative z-20 flex flex-col items-center justify-center text-center p-6 mt-[60vh]"
+                className="relative z-20 flex flex-col items-center justify-center text-center p-0 mt-[50vh]"
             >
                 <h1 className="text-6xl md:text-8xl font-bold flex flex-col items-center gap-6">
                     <span>Tu contenido</span>
-                    <span className="animated-rgb whitespace-nowrap leading-tight">
+                    <span className="animated-rgb whitespace-nowrap leading-tight pb-4">
                         Al siguiente nivel.
                     </span>
                 </h1>
