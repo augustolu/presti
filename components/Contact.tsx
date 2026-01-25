@@ -13,7 +13,7 @@ export default function Contact() {
     const linksRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLElement>(null);
     const [isHovering, setIsHovering] = useState(false);
-    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
     const [stars, setStars] = useState<any[]>([]);
 
     useEffect(() => {
@@ -202,7 +202,7 @@ export default function Contact() {
 
                     {/* Email */}
                     <button
-                        onClick={() => setIsFormOpen(true)}
+                        onClick={(e) => setTriggerRect(e.currentTarget.getBoundingClientRect())}
                         className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all hover:scale-105 hover:border-[var(--accent)]/50 opacity-0 relative overflow-hidden cursor-pointer"
                     >
                         <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -217,7 +217,7 @@ export default function Contact() {
                 </div>
             </div>
 
-            <ContactForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+            <ContactForm isOpen={!!triggerRect} onClose={() => setTriggerRect(null)} triggerRect={triggerRect} />
 
             <div className="absolute bottom-8 text-center w-full text-gray-600 text-sm">
                 © {new Date().getFullYear()} Valentino Presti. Todos los derechos reservados.

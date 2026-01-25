@@ -11,10 +11,25 @@ interface Star {
 interface Props {
   forceSlow?: boolean;
   startFast?: boolean;
+  isAccelerating?: boolean;
 }
 
-export default function WarpBackground({ forceSlow = false, startFast = false }: Props) {
+export default function WarpBackground({ forceSlow = false, startFast = false, isAccelerating = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Use refs for mutable state to persist across renders without re-running the effect
+  const speedRef = useRef(startFast ? 40 : 2);
+  const scrollYRef = useRef(0);
+
+  // Keep props in refs to access them in the animation loop
+  const isAcceleratingRef = useRef(isAccelerating);
+  const forceSlowRef = useRef(forceSlow);
+
+  // Update refs when props change
+  useEffect(() => {
+    isAcceleratingRef.current = isAccelerating;
+    forceSlowRef.current = forceSlow;
+  }, [isAccelerating, forceSlow]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,10 +42,11 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     let animationFrameId: number;
     let mx = -10000, my = -10000;
 
+    // Initialize scroll position
+    scrollYRef.current = window.scrollY;
+
     // CONFIG
     const starCount = 230;
-    // Start fast if requested (simulating exit from warp), otherwise normal speed
-    let speed = startFast ? 40 : 2;
     let tailLength = 15;
     const depth = 1000;
     const starColor = "#E0FFFF"; // Whitish cyan
@@ -45,7 +61,6 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     const minSpeed = 0.1;
     const scrollRange = 1000; // pixels to reach min speed
     let targetSpeed = maxSpeed;
-    let currentScrollY = 0;
 
     const initStars = () => {
       stars.length = 0;
@@ -78,9 +93,16 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     const onPointerLeave = () => { mx = -10000; my = -10000; };
 
     const render = () => {
+      const currentScrollY = scrollYRef.current;
+      const isAccelerating = isAcceleratingRef.current;
+      const forceSlow = forceSlowRef.current;
+      let speed = speedRef.current;
+
       // Calculate target speed based on scroll
       // Use currentScrollY updated by event listeners
-      if (forceSlow) {
+      if (isAccelerating) {
+        targetSpeed = 30; // High speed for warp effect
+      } else if (forceSlow) {
         targetSpeed = minSpeed;
       } else {
         const scrollRatio = Math.min(1, currentScrollY / scrollRange);
@@ -88,8 +110,26 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
       }
 
       // Smoothly interpolate current speed to target speed
-      // Using a simple lerp factor of 0.05 for smoothness
-      speed += (targetSpeed - speed) * 0.05;
+      if (isAccelerating) {
+        // Exponential acceleration (multiplicative)
+        // Ensure we have a minimum base to multiply from if speed is very low
+        const effectiveSpeed = Math.max(speed, 0.5);
+        speed = effectiveSpeed * 1.03; // 3% growth per frame (smoother)
+
+        speed = Math.min(speed, targetSpeed);
+      } else {
+        // Exponential deceleration
+        if (speed > targetSpeed) {
+          speed = Math.max(speed, targetSpeed) * 0.85; // Faster deceleration to return to normal
+        }
+        // Snap to target if close
+        if (Math.abs(speed - targetSpeed) < 0.5) {
+          speed = targetSpeed;
+        }
+      }
+
+      // Update ref
+      speedRef.current = speed;
 
       // Update tail length based on speed
       tailLength = Math.max(0, Math.round(15 * (speed / maxSpeed)));
@@ -134,13 +174,13 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
     };
 
     const onScroll = () => {
-      currentScrollY = window.scrollY;
+      scrollYRef.current = window.scrollY;
     };
 
     const onLenisScroll = (e: any) => {
       // e.detail contains the scroll info from Lenis
       if (e.detail && typeof e.detail.scroll === 'number') {
-        currentScrollY = e.detail.scroll;
+        scrollYRef.current = e.detail.scroll;
       }
     };
 
@@ -164,7 +204,7 @@ export default function WarpBackground({ forceSlow = false, startFast = false }:
       window.removeEventListener('lenis-scroll', onLenisScroll as EventListener);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [forceSlow, startFast]);
+  }, []); // Empty dependency array to run only once!
 
   return (
     <canvas ref={canvasRef} className="fixed inset-0 -z-10 w-full h-full pointer-events-none" />

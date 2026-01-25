@@ -1,29 +1,56 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CursorTrail() {
     const pathRef = useRef<SVGPathElement>(null);
     const pointsRef = useRef<{ x: number; y: number }[]>([]);
     const mouseRef = useRef({ x: 0, y: 0 });
     const frameRef = useRef<number>(0);
+    const lastScrollY = useRef<number>(0);
+
+    // State for click animations
+    const [clicks, setClicks] = useState<{ id: number; x: number; y: number }[]>([]);
 
     useEffect(() => {
-        // Initialize mouse position to center or off-screen to avoid jump
+        // Initialize mouse position
         mouseRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        lastScrollY.current = window.scrollY;
 
         const handleMouseMove = (e: MouseEvent) => {
             mouseRef.current = { x: e.clientX, y: e.clientY };
         };
 
+        const handleClick = (e: MouseEvent) => {
+            const newClick = { id: Date.now(), x: e.clientX, y: e.clientY };
+            setClicks((prev) => [...prev, newClick]);
+            // Remove the click after animation duration (1s)
+            setTimeout(() => {
+                setClicks((prev) => prev.filter((c) => c.id !== newClick.id));
+            }, 1000);
+        };
+
         window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("click", handleClick);
 
         const animate = () => {
             const points = pointsRef.current;
             const mouse = mouseRef.current;
+            const currentScrollY = window.scrollY;
+            const deltaY = currentScrollY - lastScrollY.current;
+
+            // Shift existing points based on scroll delta to attach them to the page
+            // This creates a trail even when scrolling without moving the mouse
+            if (deltaY !== 0) {
+                points.forEach(p => {
+                    p.y -= deltaY;
+                });
+            }
+
+            lastScrollY.current = currentScrollY;
 
             // Add new point at mouse position
-            // We add it to the beginning of the array
             points.unshift({ ...mouse });
 
             // Limit trail length
@@ -43,13 +70,15 @@ export default function CursorTrail() {
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("click", handleClick);
             cancelAnimationFrame(frameRef.current);
         };
     }, []);
 
     return (
         <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden mix-blend-screen">
-            <svg className="w-full h-full">
+            {/* Trail SVG */}
+            <svg className="w-full h-full absolute top-0 left-0">
                 <defs>
                     <linearGradient id="trail-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="var(--accent)" stopOpacity="1" />
@@ -74,6 +103,29 @@ export default function CursorTrail() {
                     opacity="0.8"
                 />
             </svg>
+
+            {/* Click Ripple Animations */}
+            <AnimatePresence>
+                {clicks.map((click) => (
+                    <motion.div
+                        key={click.id}
+                        initial={{ opacity: 1, scale: 0 }}
+                        animate={{ opacity: 0, scale: 2 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute rounded-full border-2 border-[var(--accent)]"
+                        style={{
+                            left: click.x,
+                            top: click.y,
+                            width: "40px",
+                            height: "40px",
+                            marginLeft: "-20px", // Center the div
+                            marginTop: "-20px",
+                            boxShadow: "0 0 20px var(--accent)",
+                        }}
+                    />
+                ))}
+            </AnimatePresence>
         </div>
     );
 }

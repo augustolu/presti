@@ -7,9 +7,10 @@ import Link from 'next/link';
 interface VideoEditingProps {
     hoveredService: "video" | "motion" | null;
     setHoveredService: (service: "video" | "motion" | null) => void;
+    onOpenModal: () => void;
 }
 
-export default function VideoEditing({ hoveredService, setHoveredService }: VideoEditingProps) {
+export default function VideoEditing({ hoveredService, setHoveredService, onOpenModal }: VideoEditingProps) {
     return (
         <motion.div
             onMouseEnter={() => setHoveredService("video")}
@@ -41,11 +42,11 @@ export default function VideoEditing({ hoveredService, setHoveredService }: Vide
                 >
                     Narrativa visual impactante. Cortes dinámicos, color grading y storytelling que atrapa.
                 </motion.p>
-                <Link href="/video-editing" className="mt-4">
+                <button onClick={onOpenModal} className="mt-4">
                     <span className="text-[var(--accent)] font-medium group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-2">
                         Ver Proyectos <ArrowRight className="w-5 h-5" />
                     </span>
-                </Link>
+                </button>
             </div>
         </motion.div>
     );
