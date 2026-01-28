@@ -2,17 +2,16 @@
 
 import LiquidBackground from "@/components/LiquidBackground";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+
 import { useRouter } from "next/navigation";
-import WarpTransition from "@/components/WarpTransition";
+
 import { motion } from "framer-motion";
 
 export default function MotionGraphicsPage() {
     const router = useRouter();
-    const [isWarping, setIsWarping] = useState(false);
 
     const handleBack = () => {
-        setIsWarping(true);
+        router.push("/");
     };
 
     return (
@@ -21,7 +20,8 @@ export default function MotionGraphicsPage() {
 
             <motion.div
                 className="z-10 text-center p-8"
-                animate={{ opacity: isWarping ? 0 : 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
             >
                 <h1 className="text-6xl font-bold text-[var(--accent)] mb-8">Motion Graphics</h1>
@@ -37,11 +37,6 @@ export default function MotionGraphicsPage() {
                     <span>Volver al Inicio</span>
                 </button>
             </motion.div>
-
-            <WarpTransition
-                isActive={isWarping}
-                onComplete={() => router.push("/")}
-            />
         </div>
     );
 }
