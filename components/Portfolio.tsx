@@ -10,7 +10,9 @@ import {
     useVelocity,
     wrap,
     AnimatePresence,
-    useMotionValueEvent
+    useMotionValueEvent,
+    usePresence,
+    useMotionTemplate
 } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { X, Volume2, VolumeX, Play } from "lucide-react";
@@ -28,6 +30,71 @@ const motionGraphicsVideos = [
     "/assets/demo-motion.mp4",
     "/assets/demo-motion.mp4",
 ];
+
+// Optimized Video Item Component
+function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) => void }) {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Play only when visible
+                        video.play().catch(() => {
+                            // Autoplay might be blocked or failed, ignore
+                        });
+                    } else {
+                        // Pause when out of view to save resources
+                        video.pause();
+                    }
+                });
+            },
+            {
+                threshold: 0.2, // Play when 20% visible
+                rootMargin: "50px" // Preload slightly before
+            }
+        );
+
+        observer.observe(video);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []);
+
+    return (
+        <motion.div
+            className="flex-shrink-0 w-[300px] md:w-[400px] aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/50 relative group cursor-pointer"
+            whileHover={{ scale: 1.15, zIndex: 10, transition: { duration: 0.3 } }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onClick(src)}
+        >
+            <video
+                ref={videoRef}
+                src={src}
+                className={`w-full h-full object-cover transition-all duration-500 ${isLoaded ? 'opacity-70 group-hover:opacity-100' : 'opacity-0'}`}
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedData={() => setIsLoaded(true)}
+            />
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg shadow-black/20">
+                    <Play className="w-6 h-6 text-white fill-white ml-1" />
+                </div>
+            </div>
+        </motion.div>
+    );
+}
 
 // Improved Carousel Component handling true infinite loop with Framer Motion
 function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: { videos: string[], direction: 'left' | 'right', speed: number, onVideoClick: (src: string) => void, isPaused: boolean }) {
@@ -64,7 +131,7 @@ function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: 
     });
 
     return (
-        <div className="overflow-hidden py-20 px-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]" ref={containerRef}>
+        <div className="overflow-hidden py-12 px-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]" ref={containerRef}>
             <motion.div
                 className="flex gap-6"
                 style={{ x }}
@@ -76,30 +143,7 @@ function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: 
             >
                 {/* Triple the items for smooth looping */}
                 {[...videos, ...videos, ...videos].map((src, idx) => (
-                    <motion.div
-                        key={idx}
-                        className="flex-shrink-0 w-[300px] md:w-[400px] aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/50 relative group cursor-pointer"
-                        whileHover={{ scale: 1.02, filter: "brightness(1.1)" }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => onVideoClick(src)}
-                    >
-                        <video
-                            src={src}
-                            className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-500"
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                        />
-                        {/* Hover Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
-                            <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg shadow-black/20">
-                                <Play className="w-6 h-6 text-white fill-white ml-1" />
-                            </div>
-                        </div>
-                    </motion.div>
+                    <CarouselItem key={`${src}-${idx}`} src={src} onClick={onVideoClick} />
                 ))}
             </motion.div>
         </div>
@@ -113,7 +157,7 @@ function AnimatedTitle({ text }: { text: string }) {
         hidden: { opacity: 0 },
         visible: (i = 1) => ({
             opacity: 1,
-            transition: { staggerChildren: 0.05, delayChildren: 0.04 * i },
+            transition: { staggerChildren: 0.03, delayChildren: 0.04 * i },
         }),
     };
 
@@ -139,11 +183,11 @@ function AnimatedTitle({ text }: { text: string }) {
 
     return (
         <motion.h2
-            className="text-4xl md:text-5xl font-bold text-center mb-8 overflow-hidden flex justify-center gap-[1px]"
+            className="text-4xl md:text-5xl font-bold text-center mb-8 flex justify-center gap-[1px]"
             variants={container}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: false, margin: "-100px" }}
         >
             {letters.map((letter, index) => (
                 <motion.span
@@ -155,6 +199,162 @@ function AnimatedTitle({ text }: { text: string }) {
                 </motion.span>
             ))}
         </motion.h2>
+    );
+}
+
+function JellyText({ text, className = "", containerClassName = "" }: { text: string, className?: string, containerClassName?: string }) {
+    const mouseX = useMotionValue(Infinity);
+    const mouseY = useMotionValue(Infinity);
+
+    return (
+        <motion.div
+            className={`flex items-center ${containerClassName}`}
+            initial={{ gap: "0px" }}
+            whileHover={{ gap: "6px" }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            onMouseMove={(e) => {
+                const { left, top } = e.currentTarget.getBoundingClientRect();
+                mouseX.set(e.clientX - left);
+                mouseY.set(e.clientY - top);
+            }}
+            onMouseLeave={() => {
+                mouseX.set(Infinity);
+                mouseY.set(Infinity);
+            }}
+        >
+            {text.split("").map((char, i) => (
+                <JellyLetter key={i} mouseX={mouseX} mouseY={mouseY} className={className}>
+                    {char}
+                </JellyLetter>
+            ))}
+        </motion.div>
+    );
+}
+
+function JellyLetter({ mouseX, mouseY, children, className }: { mouseX: any, mouseY: any, children: string, className: string }) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const distance = useMotionValue(Infinity);
+
+    useEffect(() => {
+        const unsubscribeX = mouseX.on("change", () => calculateDistance());
+        const unsubscribeY = mouseY.on("change", () => calculateDistance());
+
+        function calculateDistance() {
+            if (ref.current && mouseX.get() !== Infinity) {
+                const rect = ref.current.getBoundingClientRect();
+                // Get parent rect to normalize coordinates since mouseX/Y are relative to parent
+                const parent = ref.current.parentElement?.getBoundingClientRect();
+                if (!parent) return;
+
+                const letterCenterX = (rect.left - parent.left) + rect.width / 2;
+                const letterCenterY = (rect.top - parent.top) + rect.height / 2;
+
+                const dx = mouseX.get() - letterCenterX;
+                const dy = mouseY.get() - letterCenterY;
+                const d = Math.sqrt(dx * dx + dy * dy);
+                distance.set(d);
+            } else {
+                distance.set(Infinity);
+            }
+        }
+
+        return () => {
+            unsubscribeX();
+            unsubscribeY();
+        };
+    }, [mouseX, mouseY]);
+
+    const scaleSync = useTransform(distance, [0, 100], [1.5, 1]);
+    const scale = useSpring(scaleSync, { mass: 0.1, stiffness: 150, damping: 12 });
+
+    return (
+        <motion.span
+            ref={ref}
+            style={{ scale }}
+            className={`inline-block origin-bottom transition-colors duration-200 ${className}`}
+        >
+            {children === " " ? "\u00A0" : children}
+        </motion.span>
+    );
+}
+
+function VideoModal({ src, onClose }: { src: string; onClose: () => void }) {
+    const [isPresent, safeToRemove] = usePresence();
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        // Fade In
+        if (isPresent) {
+            video.volume = 0;
+            const fadeIn = setInterval(() => {
+                if (video.volume < 0.9) {
+                    video.volume += 0.1;
+                } else {
+                    video.volume = 1;
+                    clearInterval(fadeIn);
+                }
+            }, 50); // 0 to 1 in ~500ms
+            return () => clearInterval(fadeIn);
+        } else {
+            // Fade Out
+            const fadeOut = setInterval(() => {
+                if (video.volume > 0.1) {
+                    video.volume -= 0.1;
+                } else {
+                    video.volume = 0;
+                    clearInterval(fadeOut);
+                    safeToRemove(); // Remove component after fade out
+                }
+            }, 30); // 1 to 0 in ~300ms (matching exit transition)
+            return () => clearInterval(fadeOut);
+        }
+    }, [isPresent, safeToRemove]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ x: "-100vw", filter: "blur(20px)", opacity: 0 }}
+                animate={{ x: 0, filter: "blur(0px)", opacity: 1 }}
+                exit={{ x: "100vw", filter: "blur(20px)", opacity: 0 }}
+                transition={{
+                    type: "spring",
+                    damping: 25,
+                    stiffness: 200,
+                    mass: 0.8
+                }}
+                className="relative w-auto h-auto max-w-[90vw] max-h-[85vh] bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(139,92,246,0.2)] border border-[var(--accent)]/30"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 text-white hover:bg-[var(--accent)] hover:text-white transition-colors backdrop-blur-md border border-white/10"
+                >
+                    <X size={24} />
+                </button>
+
+                <video
+                    ref={videoRef}
+                    src={src}
+                    className="w-auto h-auto max-w-full max-h-[85vh] object-contain mx-auto"
+                    autoPlay
+                    controls
+                    playsInline
+                />
+
+                {/* Decorative Glow */}
+                <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-[var(--accent)]/20" />
+            </motion.div>
+        </motion.div>
     );
 }
 
@@ -200,11 +400,11 @@ export default function Portfolio() {
 
     // Transform scroll progress to x position and opacity
     // Increased range: -300 to 0
-    const videoX = useTransform(videoScrollProgress, [0, 1], [-300, 0]);
-    const videoOpacity = useTransform(videoScrollProgress, [0, 0.6], [0, 1]); // Fade in faster
+    const videoX = useTransform(videoScrollProgress, [0, 0.5], [-300, 0]);
+    const videoOpacity = useTransform(videoScrollProgress, [0, 0.4], [0, 1]); // Fade in faster
 
-    const motionX = useTransform(motionScrollProgress, [0, 1], [300, 0]); // From right
-    const motionOpacity = useTransform(motionScrollProgress, [0, 0.6], [0, 1]);
+    const motionX = useTransform(motionScrollProgress, [0, 0.5], [300, 0]); // From right
+    const motionOpacity = useTransform(motionScrollProgress, [0, 0.4], [0, 1]);
 
     return (
         <section id="portfolio" ref={containerRef} className="py-10 relative overflow-hidden">
@@ -214,15 +414,17 @@ export default function Portfolio() {
             </div>
 
             {/* Video Editing Section - Slide Left to Right */}
-            <div ref={videoSectionRef} className="mb-4">
+            <div ref={videoSectionRef} className="mb-4 mt-8">
                 <div className="container mx-auto px-4 mb-0">
                     <div className="inline-block">
                         <span className="block text-xs font-semibold text-[var(--accent)] uppercase tracking-wider mb-1 opacity-80">
                             Showcase
                         </span>
-                        <h3 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 mb-1 tracking-tight">
-                            Edición de Video
-                        </h3>
+                        <JellyText
+                            text="Edición de Video"
+                            className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 cursor-default"
+                            containerClassName="mb-1"
+                        />
                         <p className="text-gray-400 font-medium text-sm md:text-base">Narrativa visual que impacta.</p>
                     </div>
                 </div>
@@ -244,14 +446,16 @@ export default function Portfolio() {
             {/* Motion Graphics Section - Slide Right to Left */}
             <div ref={motionSectionRef} className="-mt-8">
                 <div className="container mx-auto px-4 mb-0 text-right">
-                    <div className="inline-block text-right">
+                    <div className="inline-block text-right flex flex-col items-end">
                         <span className="block text-xs font-semibold text-[var(--accent)] uppercase tracking-wider mb-1 opacity-80">
                             Showcase
                         </span>
-                        <h3 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-bl from-white via-white/90 to-white/50 mb-1 tracking-tight">
-                            Motion Graphics
-                        </h3>
-                        <p className="text-gray-300 font-medium text-sm md:text-base">Animación que da vida a tus ideas.</p>
+                        <JellyText
+                            text="Motion Graphics"
+                            className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-bl from-white via-white/90 to-white/50 cursor-default"
+                            containerClassName="mb-1 justify-end"
+                        />
+                        <p className="text-gray-400 font-medium text-sm md:text-base">Animación que da vida a tus ideas.</p>
                     </div>
                 </div>
 
@@ -272,41 +476,10 @@ export default function Portfolio() {
             {/* Video Modal */}
             <AnimatePresence>
                 {selectedVideo && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
-                        onClick={() => setSelectedVideo(null)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0, y: 50 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.8, opacity: 0, y: 50 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="relative w-auto h-auto max-w-[90vw] max-h-[85vh] bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(139,92,246,0.2)] border border-[var(--accent)]/30"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <button
-                                onClick={() => setSelectedVideo(null)}
-                                className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 text-white hover:bg-[var(--accent)] hover:text-white transition-colors backdrop-blur-md border border-white/10"
-                            >
-                                <X size={24} />
-                            </button>
-
-                            <video
-                                src={selectedVideo}
-                                className="w-auto h-auto max-w-full max-h-[85vh] object-contain mx-auto"
-                                autoPlay
-                                controls
-                                playsInline
-                            />
-
-                            {/* Decorative Glow */}
-                            <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-[var(--accent)]/20" />
-                        </motion.div>
-                    </motion.div>
+                    <VideoModal
+                        src={selectedVideo}
+                        onClose={() => setSelectedVideo(null)}
+                    />
                 )}
             </AnimatePresence>
         </section>
