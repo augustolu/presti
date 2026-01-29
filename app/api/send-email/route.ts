@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             port: 465,
             secure: true,
             auth: {
-                user: process.env.EMAIL_USER, // Tu correo (PrestiValentino004@gmail.com)
+                user: process.env.EMAIL_USER, // Tu correo
                 pass: process.env.EMAIL_PASS, // Tu contraseña de aplicación
             },
             // Optimizaciones para serverless

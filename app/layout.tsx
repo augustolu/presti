@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Editor Portfolio",
+  title: "KnightDesign - Editor Portfolio",
   description: "Elevando la visión visual - Portfolio Profesional",
 };
 

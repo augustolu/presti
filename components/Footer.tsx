@@ -98,7 +98,7 @@ export default function Footer() {
             </div>
 
             <div className="absolute bottom-8 text-center w-full text-gray-600 text-sm">
-                © {new Date().getFullYear()} Valentino Presti. Todos los derechos reservados.
+                © {new Date().getFullYear()} KnightDesign. Todos los derechos reservados.
             </div>
         </footer>
     );
