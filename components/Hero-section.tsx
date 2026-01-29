@@ -32,15 +32,15 @@ export default function HeroSection() {
             </div>
             <motion.div
                 style={{ x: xText, y: yText }}
-                className="relative z-20 flex flex-col items-center justify-center text-center p-0 mt-[50vh]"
+                className="relative z-20 flex flex-col items-center justify-center text-center p-0 mt-[40vh] md:mt-[50vh]"
             >
-                <h1 className="text-6xl md:text-8xl font-bold flex flex-col items-center gap-6">
-                    <span>Tu contenido</span>
-                    <span className="animated-rgb whitespace-nowrap leading-tight pb-4">
+                <h1 className="text-2xl md:text-6xl lg:text-8xl font-bold flex flex-col items-center gap-2 md:gap-6 text-center px-2 max-w-full w-full">
+                    <span className="break-words w-full">Tu contenido</span>
+                    <span className="animated-rgb whitespace-normal md:whitespace-nowrap leading-tight pb-4 break-words w-full">
                         Al siguiente nivel.
                     </span>
                 </h1>
-                <p className="text-gray-300 text-lg md:text-xl max-w-2xl mt-4">
+                <p className="text-gray-300 text-sm md:text-xl max-w-2xl mt-4 px-4">
                     Editor profesional especializado en edición de videos y motion graphics.
                 </p>
             </motion.div>
