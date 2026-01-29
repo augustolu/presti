@@ -3,41 +3,74 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { allVideos } from "@/constants/assets";
+
 export default function Preloader() {
     const [isLoading, setIsLoading] = useState(true);
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        // Simulate loading progress
-        const interval = setInterval(() => {
-            setProgress((prev) => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    return 100;
-                }
-                // Random increment for realistic feel
-                return prev + Math.random() * 10;
+        const loadAssets = async () => {
+            const totalAssets = allVideos.length;
+            let loadedCount = 0;
+
+            const updateProgress = () => {
+                loadedCount++;
+                const newProgress = (loadedCount / totalAssets) * 100;
+                setProgress(newProgress);
+            };
+
+            const promises = allVideos.map((src) => {
+                return new Promise<void>((resolve) => {
+                    const video = document.createElement("video");
+                    video.src = src;
+                    video.preload = "auto";
+
+                    // We consider it "loaded" enough when it can play through or has buffered enough data
+                    // 'canplaythrough' is ideal but might be too strict for slow connections
+                    // 'loadeddata' is faster but might buffer later
+                    const onLoaded = () => {
+                        updateProgress();
+                        resolve();
+                        cleanup();
+                    };
+
+                    const onError = () => {
+                        console.warn(`Failed to preload video: ${src}`);
+                        updateProgress(); // Count it anyway to avoid hanging
+                        resolve();
+                        cleanup();
+                    };
+
+                    const cleanup = () => {
+                        video.removeEventListener("canplaythrough", onLoaded);
+                        video.removeEventListener("error", onError);
+                    };
+
+                    video.addEventListener("canplaythrough", onLoaded);
+                    video.addEventListener("error", onError);
+
+                    // Fallback timeout in case of network issues (10 seconds max per video)
+                    setTimeout(() => {
+                        cleanup();
+                        resolve(); // Resolve anyway to not block indefinitely
+                    }, 10000);
+                });
             });
-        }, 100);
 
-        // Ensure minimum load time of 2 seconds for branding
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000);
+            try {
+                await Promise.all(promises);
+            } catch (error) {
+                console.error("Error preloading assets:", error);
+            }
 
-        const handleLoad = () => {
-            // When window loads, we still wait for the timer if it hasn't finished
-            // But if the timer is done, we can finish immediately
-            // In this simple logic, the timer acts as the minimum duration
+            // Ensure minimum branding time (1s)
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
         };
 
-        window.addEventListener("load", handleLoad);
-
-        return () => {
-            clearInterval(interval);
-            clearTimeout(timer);
-            window.removeEventListener("load", handleLoad);
-        };
+        loadAssets();
     }, []);
 
     return (

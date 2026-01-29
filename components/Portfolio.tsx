@@ -11,39 +11,27 @@ import {
     wrap,
     AnimatePresence,
     useMotionValueEvent,
-    usePresence,
     useMotionTemplate,
+    usePresence,
     Variants
 } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { X, Volume2, VolumeX, Play } from "lucide-react";
 
-const videoEditingVideos = [
-    "/assets/demo-video-edit.mp4",
-    "/assets/demo-video-edit.mp4",
-    "/assets/demo-video-edit.mp4",
-    "/assets/demo-video-edit.mp4",
-];
-
-const motionGraphicsVideos = [
-    "/assets/demo-motion.mp4",
-    "/assets/demo-motion.mp4",
-    "/assets/demo-motion.mp4",
-    "/assets/demo-motion.mp4",
-];
+import { videoEditingVideos, motionGraphicsVideos } from "@/constants/assets";
 
 // Optimized Video Item Component
-function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) => void }) {
+function CarouselItem({ video, onClick }: { video: { thumbnail: string, full: string }, onClick: (src: string) => void }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [preloadStrategy, setPreloadStrategy] = useState<"none" | "auto">("none");
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        const videoEl = videoRef.current;
+        if (!videoEl) return;
 
         // Check if already loaded (for hydration/navigation)
-        if (video.readyState >= 3) {
+        if (videoEl.readyState >= 3) {
             setIsLoaded(true);
         }
 
@@ -57,13 +45,13 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
                         // Stagger playback to prevent main thread freeze
                         const delay = Math.random() * 300; // 0-300ms random delay
                         setTimeout(() => {
-                            video.play().catch(() => {
+                            videoEl.play().catch(() => {
                                 // Autoplay might be blocked or failed, ignore
                             });
                         }, delay);
                     } else {
                         // Pause immediately when out of view
-                        video.pause();
+                        videoEl.pause();
                     }
                 });
             },
@@ -73,7 +61,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
             }
         );
 
-        observer.observe(video);
+        observer.observe(videoEl);
 
         return () => {
             observer.disconnect();
@@ -85,7 +73,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
             className="flex-shrink-0 w-[300px] md:w-[400px] aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/50 relative group cursor-pointer"
             whileHover={{ scale: 1.15, zIndex: 10, transition: { duration: 0.3 } }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onClick(src)}
+            onClick={() => onClick(video.full)}
         >
 
             {/* Loading State / Placeholder */}
@@ -93,7 +81,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
 
             <video
                 ref={videoRef}
-                src={src}
+                src={video.thumbnail}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? "opacity-70 group-hover:opacity-100" : "opacity-0"}`}
                 loop
                 muted
@@ -114,7 +102,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
 }
 
 // Improved Carousel Component handling true infinite loop with Framer Motion
-function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: { videos: string[], direction: 'left' | 'right', speed: number, onVideoClick: (src: string) => void, isPaused: boolean }) {
+function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: { videos: { thumbnail: string, full: string }[], direction: 'left' | 'right', speed: number, onVideoClick: (src: string) => void, isPaused: boolean }) {
     const x = useMotionValue(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const [contentWidth, setContentWidth] = useState(0);
@@ -159,8 +147,8 @@ function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: 
                 }}
             >
                 {/* Triple the items for smooth looping */}
-                {[...videos, ...videos, ...videos].map((src, idx) => (
-                    <CarouselItem key={`${src}-${idx}`} src={src} onClick={onVideoClick} />
+                {[...videos, ...videos, ...videos].map((video, idx) => (
+                    <CarouselItem key={`${video.thumbnail}-${idx}`} video={video} onClick={onVideoClick} />
                 ))}
             </motion.div>
         </div>
