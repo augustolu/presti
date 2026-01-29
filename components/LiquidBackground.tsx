@@ -118,12 +118,15 @@ export default function WarpBackground({ forceSlow = false, startFast = false, i
 
         speed = Math.min(speed, targetSpeed);
       } else {
-        // Exponential deceleration
+        // Exponential deceleration/acceleration to target
         if (speed > targetSpeed) {
-          speed = Math.max(speed, targetSpeed) * 0.85; // Faster deceleration to return to normal
+          speed = Math.max(speed, targetSpeed) * 0.95; // Slower deceleration for smoothness
+        } else if (speed < targetSpeed) {
+          speed = Math.min(speed, targetSpeed) * 1.02 + 0.01; // Gradual acceleration
         }
+
         // Snap to target if close
-        if (Math.abs(speed - targetSpeed) < 0.5) {
+        if (Math.abs(speed - targetSpeed) < 0.05) {
           speed = targetSpeed;
         }
       }

@@ -44,19 +44,22 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        // Play only when visible
-                        video.play().catch(() => {
-                            // Autoplay might be blocked or failed, ignore
-                        });
+                        // Stagger playback to prevent main thread freeze
+                        const delay = Math.random() * 300; // 0-300ms random delay
+                        setTimeout(() => {
+                            video.play().catch(() => {
+                                // Autoplay might be blocked or failed, ignore
+                            });
+                        }, delay);
                     } else {
-                        // Pause when out of view to save resources
+                        // Pause immediately when out of view
                         video.pause();
                     }
                 });
             },
             {
-                threshold: 0.2, // Play when 20% visible
-                rootMargin: "50px" // Preload slightly before
+                threshold: 0.2,
+                rootMargin: "50px"
             }
         );
 
@@ -77,11 +80,11 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
             <video
                 ref={videoRef}
                 src={src}
-                className={`w-full h-full object-cover transition-all duration-500 ${isLoaded ? 'opacity-70 group-hover:opacity-100' : 'opacity-0'}`}
+                className="w-full h-full object-cover transition-all duration-500 opacity-70 group-hover:opacity-100"
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 onLoadedData={() => setIsLoaded(true)}
             />
             {/* Hover Overlay */}
@@ -133,7 +136,7 @@ function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: 
     return (
         <div className="overflow-hidden py-12 px-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]" ref={containerRef}>
             <motion.div
-                className="flex gap-6"
+                className="flex gap-6 will-change-transform" // Added will-change-transform
                 style={{ x }}
                 drag="x"
                 dragConstraints={{ left: -contentWidth, right: 0 }} // Not truly infinite drag, but safe

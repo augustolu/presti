@@ -2,19 +2,46 @@
 
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLenis } from "@/lib/LenisContext";
 
 const navLinks = [
-    { name: "Inicio", href: "/" },
-    { name: "Skills", href: "#skills" },
-    { name: "Motion Graphics", href: "/motion-graphics" },
-    { name: "Edición de video", href: "/video-editing" },
+    { name: "Inicio", href: "#" },
+    { name: "Portfolio", href: "#portfolio" },
+    { name: "Contacto", href: "#contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ onNavigating }: { onNavigating?: (state: boolean) => void }) {
     const [isOpen, setIsOpen] = useState(false);
+    const lenis = useLenis();
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        e.preventDefault();
+        setIsOpen(false);
+
+        if (!lenis) return;
+
+        const target = href === "#" ? 0 : href;
+
+        if (onNavigating) {
+            onNavigating(true);
+
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+            timeoutRef.current = setTimeout(() => {
+                onNavigating(false);
+                timeoutRef.current = null;
+            }, 2000);
+        }
+
+        lenis.scrollTo(target, {
+            duration: 2.0,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
+        });
+    };
 
     return (
         <motion.nav
@@ -25,7 +52,7 @@ export default function Navbar() {
         >
             <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
                 {/* LOGO */}
-                <Link href="/" className="relative w-32 h-10">
+                <Link href="/" className="relative w-32 h-10" onClick={(e) => handleScroll(e, "#")}>
                     <Image
                         src="/assets/logo.png"
                         alt="Logo"
@@ -38,13 +65,14 @@ export default function Navbar() {
                 {/* Desktop Menu */}
                 <div className="hidden md:flex gap-8">
                     {navLinks.map((link) => (
-                        <Link
+                        <a
                             key={link.name}
                             href={link.href}
-                            className="text-sm font-medium text-gray-300 hover:text-[var(--accent)] transition-colors"
+                            onClick={(e) => handleScroll(e, link.href)}
+                            className="text-sm font-medium text-gray-300 hover:text-[var(--accent)] transition-colors cursor-pointer"
                         >
                             {link.name}
-                        </Link>
+                        </a>
                     ))}
                 </div>
 
@@ -67,14 +95,14 @@ export default function Navbar() {
                 >
                     <div className="flex flex-col p-6 gap-4">
                         {navLinks.map((link) => (
-                            <Link
+                            <a
                                 key={link.name}
                                 href={link.href}
-                                onClick={() => setIsOpen(false)}
-                                className="text-lg font-medium text-gray-300 hover:text-[var(--accent)]"
+                                onClick={(e) => handleScroll(e, link.href)}
+                                className="text-lg font-medium text-gray-300 hover:text-[var(--accent)] cursor-pointer"
                             >
                                 {link.name}
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </motion.div>
