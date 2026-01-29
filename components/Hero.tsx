@@ -106,13 +106,13 @@ export default function Hero() {
                         style={{ opacity: opacityHero, scale: scaleHero, x: xText, y: yText }}
                         className="text-center flex flex-col items-center gap-6 p-6"
                     >
-                        <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold flex flex-col items-center gap-2 md:gap-6 text-center px-4">
+                        <h1 className="text-3xl sm:text-5xl md:text-8xl font-bold flex flex-col items-center gap-2 md:gap-6 text-center px-2 max-w-[95vw]">
                             <span>Tu contenido</span>
-                            <span className="animated-rgb whitespace-normal md:whitespace-nowrap leading-tight pb-4">
+                            <span className="animated-rgb whitespace-normal md:whitespace-nowrap leading-tight pb-4 break-words w-full">
                                 Al siguiente nivel.
                             </span>
                         </h1>
-                        <p className="text-gray-300 text-base md:text-xl max-w-2xl px-4">
+                        <p className="text-gray-300 text-sm md:text-xl max-w-2xl px-4">
                             Editor profesional especializado en edición de videos y motion graphics.
                         </p>
                     </motion.div>
