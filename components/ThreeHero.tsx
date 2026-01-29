@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { MotionValue } from "framer-motion";
+import { prefix } from "@/utils/prefix";
 
 interface DepthPlaneProps {
     mouseX: MotionValue<number>;
@@ -16,7 +17,7 @@ function DepthPlane({ mouseX, mouseY }: DepthPlaneProps) {
     const { size, viewport } = useThree();
 
     const [colorMap] = useTexture([
-        "/assets/hero.png",
+        `${prefix}/assets/hero.png`,
     ]);
 
     // Texture configuration to prevent edge tearing and pixelation
