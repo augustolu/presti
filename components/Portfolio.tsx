@@ -78,14 +78,18 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
             whileTap={{ scale: 0.98 }}
             onClick={() => onClick(src)}
         >
+
+            {/* Loading State / Placeholder */}
+            <div className={`absolute inset-0 bg-white/5 transition-opacity duration-500 ${isLoaded ? "opacity-0" : "opacity-100"}`} />
+
             <video
                 ref={videoRef}
                 src={src}
-                className="w-full h-full object-cover transition-all duration-500 opacity-70 group-hover:opacity-100"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? "opacity-70 group-hover:opacity-100" : "opacity-0"}`}
                 loop
                 muted
                 playsInline
-                preload="none"
+                preload="metadata"
                 onLoadedData={() => setIsLoaded(true)}
             />
             {/* Hover Overlay */}
