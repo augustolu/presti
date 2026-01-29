@@ -16,7 +16,7 @@ function DepthPlane({ mouseX, mouseY }: DepthPlaneProps) {
     const { size, viewport } = useThree();
 
     const [colorMap] = useTexture([
-        "/assets/logo.png",
+        "/assets/hero.png",
     ]);
 
     // Texture configuration to prevent edge tearing and pixelation
