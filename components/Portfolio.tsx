@@ -36,15 +36,24 @@ const motionGraphicsVideos = [
 function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) => void }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [preloadStrategy, setPreloadStrategy] = useState<"none" | "auto">("none");
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
+        // Check if already loaded (for hydration/navigation)
+        if (video.readyState >= 3) {
+            setIsLoaded(true);
+        }
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
+                        // Start loading when close to view
+                        setPreloadStrategy("auto");
+
                         // Stagger playback to prevent main thread freeze
                         const delay = Math.random() * 300; // 0-300ms random delay
                         setTimeout(() => {
@@ -89,7 +98,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload={preloadStrategy}
                 onLoadedData={() => setIsLoaded(true)}
             />
             {/* Hover Overlay */}
