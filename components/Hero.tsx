@@ -7,9 +7,9 @@ import LiquidBackground from "./LiquidBackground";
 import { Video, MonitorPlay, ArrowRight } from "lucide-react";
 
 interface LenisScrollEvent extends Event {
-  detail: {
-    scroll: number;
-  };
+    detail: {
+        scroll: number;
+    };
 }
 
 export default function Hero() {
@@ -106,7 +106,7 @@ export default function Hero() {
                         style={{ opacity: opacityHero, scale: scaleHero, x: xText, y: yText }}
                         className="text-center flex flex-col items-center gap-6 p-6"
                     >
-                        <h1 className="text-6xl md:text-8xl font-bold flex flex-col items-center gap-6">
+                        <h1 className="text-4xl md:text-8xl font-bold flex flex-col items-center gap-6">
                             <span>Tu contenido</span>
                             <span className="animated-rgb whitespace-nowrap leading-tight pb-4">
                                 Al siguiente nivel.
@@ -130,7 +130,7 @@ export default function Hero() {
                                 onMouseLeave={() => setHoveredService(null)}
                                 animate={{ flex: hoveredService === "video" ? 2 : hoveredService === "motion" ? 1 : 1.5 }}
                                 transition={{ duration: 0.2, ease: "circOut" }}
-                                className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                                className="relative h-full flex flex-col items-center justify-center p-6 md:p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
                             >
                                 {/* Background Icon Hook */}
                                 <Video className="absolute -left-12 -bottom-12 w-96 h-96 text-white/[.03] group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" />
@@ -158,7 +158,7 @@ export default function Hero() {
                                 onMouseLeave={() => setHoveredService(null)}
                                 animate={{ flex: hoveredService === "motion" ? 2 : hoveredService === "video" ? 1 : 1.5 }}
                                 transition={{ duration: 0.2, ease: "circOut" }}
-                                className="relative h-full flex flex-col items-center justify-center p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                                className="relative h-full flex flex-col items-center justify-center p-6 md:p-12 group overflow-hidden hover:bg-white/[.02] transition-all duration-200 cursor-pointer hover:shadow-[0_0_60px_rgba(255,255,255,0.05)]"
                             >
                                 {/* Background Icon Hook */}
                                 <MonitorPlay className="absolute -right-12 -top-12 w-96 h-96 text-white/[.03] group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" />

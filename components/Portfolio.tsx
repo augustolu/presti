@@ -85,7 +85,7 @@ function CarouselItem({ src, onClick }: { src: string, onClick: (src: string) =>
                 loop
                 muted
                 playsInline
-                preload="auto"
+                preload="none"
                 onLoadedData={() => setIsLoaded(true)}
             />
             {/* Hover Overlay */}

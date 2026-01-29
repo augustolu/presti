@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "../components/SmoothScroll";
+import Preloader from "../components/Preloader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased bg-background text-foreground`}
       >
+        <Preloader />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

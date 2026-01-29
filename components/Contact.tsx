@@ -71,6 +71,9 @@ export default function Contact() {
                                 delay: stagger(100, { start: 600 }),
                             });
                         }
+
+                        // Disconnect observer to ensure animation runs only once
+                        observer.disconnect();
                     }
                 });
             },
