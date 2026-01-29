@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useLenis } from "@/lib/LenisContext";
 
 const navLinks = [
     { name: "Inicio", href: "#" },
@@ -15,42 +14,31 @@ const navLinks = [
 
 export default function Navbar({ onNavigating }: { onNavigating?: (state: boolean) => void }) {
     const [isOpen, setIsOpen] = useState(false);
-    const lenis = useLenis();
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         e.preventDefault();
         setIsOpen(false);
 
-        if (!lenis) return;
-
-        const target = href === "#" ? 0 : href;
-
-        if (onNavigating) {
-            onNavigating(true);
-
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-            timeoutRef.current = setTimeout(() => {
-                onNavigating(false);
-                timeoutRef.current = null;
-            }, 2000);
+        if (href === "#") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
         }
 
-        lenis.scrollTo(target, {
-            duration: 2.0,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
-        });
+        const targetId = href.replace("#", "");
+        const elem = document.getElementById(targetId);
+
+        if (elem) {
+            elem.scrollIntoView({ behavior: "smooth" });
+        }
     };
 
     return (
         <motion.nav
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/30 border-b border-white/5"
+            className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10"
         >
-            <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 {/* LOGO */}
                 <Link href="/" className="relative w-32 h-10" onClick={(e) => handleScroll(e, "#")}>
                     <Image
