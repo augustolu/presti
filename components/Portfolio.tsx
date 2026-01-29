@@ -12,7 +12,8 @@ import {
     AnimatePresence,
     useMotionValueEvent,
     usePresence,
-    useMotionTemplate
+    useMotionTemplate,
+    Variants
 } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { X, Volume2, VolumeX, Play } from "lucide-react";
@@ -156,7 +157,7 @@ function InfiniteCarousel({ videos, direction, speed, onVideoClick, isPaused }: 
 function AnimatedTitle({ text }: { text: string }) {
     const letters = Array.from(text);
 
-    const container = {
+    const container: Variants = {
         hidden: { opacity: 0 },
         visible: (i = 1) => ({
             opacity: 1,
@@ -164,7 +165,7 @@ function AnimatedTitle({ text }: { text: string }) {
         }),
     };
 
-    const child = {
+    const child: Variants = {
         visible: {
             opacity: 1,
             y: 0,

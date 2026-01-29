@@ -11,12 +11,19 @@ export async function POST(request: Request) {
 
         // Configuración del transporte (quién envía el correo)
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USER, // Tu correo (PrestiValentino004@gmail.com)
                 pass: process.env.EMAIL_PASS, // Tu contraseña de aplicación
             },
-        });
+            // Optimizaciones para serverless
+            pool: false, // Usar conexión directa en lugar de pool para serverless
+            connectionTimeout: 5000, // 5 segundos de timeout
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+        } as any);
 
         // Configuración del mensaje
         const mailOptions = {

@@ -40,31 +40,37 @@ export default function Contact() {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         // Title Animation
-                        animate(titleRef.current, {
-                            opacity: [0, 1],
-                            translateY: [50, 0],
-                            duration: 1000,
-                            ease: "outExpo",
-                            delay: 200,
-                        });
+                        if (titleRef.current) {
+                            animate(titleRef.current, {
+                                opacity: [0, 1],
+                                translateY: [50, 0],
+                                duration: 1000,
+                                ease: "outExpo",
+                                delay: 200,
+                            });
+                        }
 
                         // Text Animation
-                        animate(textRef.current, {
-                            opacity: [0, 1],
-                            translateY: [30, 0],
-                            duration: 1000,
-                            ease: "outExpo",
-                            delay: 400,
-                        });
+                        if (textRef.current) {
+                            animate(textRef.current, {
+                                opacity: [0, 1],
+                                translateY: [30, 0],
+                                duration: 1000,
+                                ease: "outExpo",
+                                delay: 400,
+                            });
+                        }
 
                         // Links Animation (Staggered)
-                        animate(linksRef.current?.children, {
-                            opacity: [0, 1],
-                            translateY: [20, 0],
-                            duration: 800,
-                            ease: "outExpo",
-                            delay: stagger(100, { start: 600 }),
-                        });
+                        if (linksRef.current) {
+                            animate(linksRef.current.children, {
+                                opacity: [0, 1],
+                                translateY: [20, 0],
+                                duration: 800,
+                                ease: "outExpo",
+                                delay: stagger(100, { start: 600 }),
+                            });
+                        }
                     }
                 });
             },
